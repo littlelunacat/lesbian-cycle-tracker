@@ -1,0 +1,18 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /users/{userId} {
+      // Allow users to read/write their own document
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+      
+      // Allow reading other users' documents for linking purposes
+      allow read: if request.auth != null;
+      
+      // Allow writing specific fields to other users' documents for partner linking
+      allow write: if request.auth != null && 
+        (request.auth.uid == userId || 
+         // Allow writing partnerSecretCode and periodDates to other documents for partner access
+         request.resource.data.diff(resource.data).affectedKeys().hasOnly(['partnerSecretCode', 'periodDates']));
+    }
+  }
+} 
