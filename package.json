@@ -2,6 +2,7 @@
   "name": "lesbian-cycle-tracker",
   "main": "expo-router/entry",
   "version": "1.0.0",
+  "homepage": "https://littlelunacat.github.io/lesbian-cycle-tracker",
   "scripts": {
     "start": "expo start",
     "reset-project": "node ./scripts/reset-project.js",
