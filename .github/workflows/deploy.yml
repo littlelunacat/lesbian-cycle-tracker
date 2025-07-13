@@ -47,7 +47,4 @@ jobs:
     steps:
       - name: Deploy to GitHub Pages
         id: deployment
-        uses: actions/deploy-pages@v4
-        
-      - name: Output deployment URL
-        run: echo "Deployment URL: https://littlelunacat.github.io/lesbian-cycle-tracker/" 
+        uses: actions/deploy-pages@v4 
