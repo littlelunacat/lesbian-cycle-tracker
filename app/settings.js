@@ -405,7 +405,7 @@ export default function CouplePage() {
         
         {/* Home button */}
         <Pressable
-          onPress={() => router.push('/')}
+          onPress={() => router.push('/calendar')}
           style={{
             padding: 10,
             justifyContent: 'center',

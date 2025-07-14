@@ -57,7 +57,7 @@ export default function Login() {
         await signInWithEmailAndPassword(auth, email, password);
         showNotification('Success', 'Logged in successfully!');
       }
-      router.replace('/');
+      router.replace('/calendar');
     } catch (error) {
       console.error('Auth error:', error);
       let errorMessage = 'Authentication failed. Please try again.';

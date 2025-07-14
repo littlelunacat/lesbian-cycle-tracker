@@ -59,7 +59,7 @@ const CustomDay = ({ date, state, marking, onPress }) => {
   );
 };
 
-export default function Home() {
+export default function CalendarPage() {
   const router = useRouter();
   const [loading, setLoading] = useState(true);
   const [markedDates, setMarkedDates] = useState({});
@@ -239,8 +239,6 @@ export default function Home() {
     return unsubscribe;
   }, []);
 
-
-
   if (loading) {
     return (
       <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
@@ -391,4 +389,4 @@ export default function Home() {
       </View>
     </View>
   );
-}
+} 
