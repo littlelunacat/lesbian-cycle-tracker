@@ -233,10 +233,9 @@ export default function CalendarPage() {
     if (Object.keys(partnerDates).length > 0) {
       Object.keys(partnerDates).forEach(date => {
         if (combined[date]) {
-          // Both users have this date - show both dots side by side
+          // Both users have some kind of date - preserve existing state and add partner period dot
           combined[date] = { 
             ...combined[date],
-            selected: true,
             dots: [
               { key: 'partner', color: 'orange' }
             ]
@@ -254,6 +253,25 @@ export default function CalendarPage() {
     }
     setCombinedDates(combined);
   }, [markedDates, partnerDates, sexyDates, partnerSexyDates]);
+
+  // Helper function to save partner data to Firestore
+  const savePartnerData = async (dataType, dataArray) => {
+    if (!partnerId) return;
+    
+    try {
+      const q = query(collection(db, 'users'), where('secretCode', '==', partnerId));
+      const querySnapshot = await getDocs(q);
+      if (!querySnapshot.empty) {
+        const partnerDoc = querySnapshot.docs[0];
+        const partnerDocRef = doc(db, 'users', partnerDoc.id);
+        await setDoc(partnerDocRef, { [dataType]: dataArray }, { merge: true });
+        // Reload partner data to sync state
+        await loadPartnerDates(partnerId);
+      }
+    } catch (error) {
+      console.error(`Error saving partner ${dataType}:`, error);
+    }
+  };
 
   // Toggle date and save
   const onDayPress = async (day) => {
@@ -278,7 +296,7 @@ export default function CalendarPage() {
           await setDoc(userDoc, { periodDates: datesArray }, { merge: true });
         }
       } else {
-        // Toggle partner's period dates (temporary, not saved to database)
+        // Toggle partner's period dates and save to Firestore
         let newPartnerDates = { ...partnerDates };
         if (newPartnerDates[date]) {
           delete newPartnerDates[date];
@@ -289,7 +307,8 @@ export default function CalendarPage() {
           };
         }
         setPartnerDates(newPartnerDates);
-        // Note: Partner dates are not saved to database - they're temporary
+        // Save to Firestore
+        await savePartnerData('periodDates', Object.keys(newPartnerDates));
       }
     } else if (trackingType === 'sexy') {
       if (trackingFor === 'self') {
@@ -308,7 +327,7 @@ export default function CalendarPage() {
           await setDoc(userDoc, { sexyDates: sexyArray }, { merge: true });
         }
       } else {
-        // Toggle partner's sexy dates (temporary, not saved to database)
+        // Toggle partner's sexy dates and save to Firestore
         let newPartnerSexyDates = { ...partnerSexyDates };
         if (newPartnerSexyDates[date]) {
           delete newPartnerSexyDates[date];
@@ -316,7 +335,8 @@ export default function CalendarPage() {
           newPartnerSexyDates[date] = true;
         }
         setPartnerSexyDates(newPartnerSexyDates);
-        // Not saved to database
+        // Save to Firestore
+        await savePartnerData('sexyDates', Object.keys(newPartnerSexyDates));
       }
     }
   };
