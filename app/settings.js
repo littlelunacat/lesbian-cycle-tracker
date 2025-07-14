@@ -2,7 +2,7 @@ import { useRouter } from 'expo-router';
 import { EmailAuthProvider, reauthenticateWithCredential, sendPasswordResetEmail, updatePassword } from 'firebase/auth';
 import { collection, doc, getDoc, getDocs, query, setDoc, where } from 'firebase/firestore';
 import { useEffect, useState } from 'react';
-import { Pressable, Text, TextInput, View } from 'react-native';
+import { Platform, Pressable, ScrollView, Text, TextInput, View } from 'react-native';
 import { auth, db } from '../firebaseConfig';
 
 // Function to generate a random unique ID
@@ -389,7 +389,7 @@ export default function CouplePage() {
         justifyContent: 'space-between', 
         alignItems: 'center',
         padding: 20,
-        paddingTop: 40,
+        paddingTop: Platform.OS === 'ios' ? 60 : 20,
         backgroundColor: 'white',
         borderBottomWidth: 1,
         borderBottomColor: '#e0e0e0'
@@ -416,7 +416,7 @@ export default function CouplePage() {
         </Pressable>
       </View>
 
-      <View style={{ flex: 1, padding: 20, paddingBottom: 40, overflow: 'auto' }}>
+      <ScrollView style={{ flex: 1, padding: 20, paddingBottom: 40 }} showsVerticalScrollIndicator={false}>
         {notification ? (
           <View style={{ 
             backgroundColor: notification.includes('Error') ? '#ffebee' : '#e8f5e8', 
@@ -850,7 +850,7 @@ export default function CouplePage() {
             </View>
           )}
         </View>
-      </View>
+      </ScrollView>
     </View>
   );
 } 

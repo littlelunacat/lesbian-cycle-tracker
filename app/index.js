@@ -1,7 +1,7 @@
 import { useRouter } from 'expo-router';
 import { collection, doc, getDoc, getDocs, query, setDoc, where } from 'firebase/firestore';
 import { useEffect, useState } from 'react';
-import { Pressable, Text, View } from 'react-native';
+import { Platform, Pressable, Text, View } from 'react-native';
 import { Calendar } from 'react-native-calendars';
 import { auth, db } from '../firebaseConfig';
 
@@ -257,7 +257,7 @@ export default function Home() {
         justifyContent: 'space-between', 
         alignItems: 'center',
         padding: 20,
-        paddingTop: 40,
+        paddingTop: Platform.OS === 'ios' ? 60 : 20,
         backgroundColor: 'white',
         borderBottomWidth: 1,
         borderBottomColor: '#e0e0e0'
