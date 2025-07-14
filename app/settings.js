@@ -1,8 +1,9 @@
+import * as Clipboard from 'expo-clipboard';
 import { useRouter } from 'expo-router';
 import { EmailAuthProvider, reauthenticateWithCredential, sendPasswordResetEmail, updatePassword } from 'firebase/auth';
 import { collection, doc, getDoc, getDocs, query, setDoc, where } from 'firebase/firestore';
 import { useEffect, useState } from 'react';
-import { Platform, Pressable, ScrollView, Text, TextInput, View } from 'react-native';
+import { KeyboardAvoidingView, Modal, Platform, Pressable, ScrollView, Text, TextInput, View } from 'react-native';
 import { auth, db } from '../firebaseConfig';
 
 // Function to generate a random unique ID
@@ -35,12 +36,17 @@ export default function CouplePage() {
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [changingPassword, setChangingPassword] = useState(false);
+  const [showModal, setShowModal] = useState(false);
 
   // Simple notification function that works on web
   const showNotification = (title, message) => {
     console.log(`${title}: ${message}`);
     setNotification(`${title}: ${message}`);
-    setTimeout(() => setNotification(''), 3000);
+    setShowModal(true);
+    setTimeout(() => {
+      setShowModal(false);
+      setNotification('');
+    }, 1500);
   };
 
   // Load current partner and my unique ID on mount
@@ -373,6 +379,17 @@ export default function CouplePage() {
     }
   };
 
+  const copySecretCode = async () => {
+    if (mySecretCode) {
+      try {
+        await Clipboard.setStringAsync(mySecretCode);
+        showNotification('Success', 'Copied!');
+      } catch (error) {
+        showNotification('Error', 'Failed to copy');
+      }
+    }
+  };
+
   if (loading) {
     return (
       <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
@@ -382,461 +399,274 @@ export default function CouplePage() {
   }
 
   return (
-    <View style={{ flex: 1, backgroundColor: '#f5f5f5' }}>
-      {/* Header with title and home button */}
-      <View style={{ 
-        flexDirection: 'row', 
-        justifyContent: 'space-between', 
-        alignItems: 'center',
-        padding: 20,
-        paddingTop: Platform.OS === 'ios' ? 60 : 20,
-        backgroundColor: 'white',
-        borderBottomWidth: 1,
-        borderBottomColor: '#e0e0e0'
-      }}>
-        <View>
-          <Text style={{ fontSize: 24, fontWeight: 'bold', color: '#333' }}>
-            Settings
-          </Text>
-          <Text style={{ fontSize: 14, color: '#666', marginTop: 2 }}>
-            Manage your account and link with your partner
-          </Text>
-        </View>
-        
-        {/* Home button */}
-        <Pressable
-          onPress={() => router.push('/calendar')}
-          style={{
-            padding: 10,
-            justifyContent: 'center',
-            alignItems: 'center',
-          }}
-        >
-          <Text style={{ fontSize: 24, color: '#666' }}>⌂</Text>
-        </Pressable>
-      </View>
-
-      <ScrollView style={{ flex: 1, padding: 20, paddingBottom: 40 }} showsVerticalScrollIndicator={false}>
-        {notification ? (
-          <View style={{ 
-            backgroundColor: notification.includes('Error') ? '#ffebee' : '#e8f5e8', 
-            padding: 10, 
-            borderRadius: 5, 
-            marginBottom: 20,
-            border: notification.includes('Error') ? '1px solid #f44336' : '1px solid #4caf50'
-          }}>
-            <Text style={{ 
-              color: notification.includes('Error') ? '#d32f2f' : '#2e7d32',
-              textAlign: 'center'
-            }}>
-              {notification}
+    <KeyboardAvoidingView 
+      style={{ flex: 1, backgroundColor: '#f5f5f5' }}
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+    >
+      <View style={{ flex: 1, backgroundColor: '#f5f5f5' }}>
+        {/* Header with title and home button */}
+        <View style={{ 
+          flexDirection: 'row', 
+          justifyContent: 'space-between', 
+          alignItems: 'center',
+          padding: 20,
+          paddingTop: Platform.OS === 'ios' ? 60 : 20,
+          backgroundColor: 'white',
+          borderBottomWidth: 1,
+          borderBottomColor: '#e0e0e0'
+        }}>
+          <View>
+            <Text style={{ fontSize: 24, fontWeight: 'bold', color: '#333' }}>
+              Settings
+            </Text>
+            <Text style={{ fontSize: 14, color: '#666', marginTop: 2 }}>
+              Manage your account and link with your partner
             </Text>
           </View>
-        ) : null}
-
-        {/* Section 1: Your Profile */}
-        <View style={{ 
-          backgroundColor: 'white', 
-          borderRadius: 15, 
-          padding: 20, 
-          marginBottom: 20,
-          shadowColor: '#000',
-          shadowOffset: { width: 0, height: 2 },
-          shadowOpacity: 0.1,
-          shadowRadius: 8,
-          elevation: 4,
-        }}>
-          <Text style={{ fontSize: 20, fontWeight: 'bold', marginBottom: 20, color: '#333' }}>
-            Your Profile
-          </Text>
           
-          {/* Nickname */}
-          <View style={{ marginBottom: 20 }}>
-            {editingNickname ? (
-              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
-                <Text style={{ fontSize: 16, fontWeight: '600', color: '#555', minWidth: 80 }}>
-                  Nickname
-                </Text>
-                <TextInput
-                  style={{
-                    flex: 1,
-                    borderWidth: 1,
-                    borderColor: '#ccc',
-                    borderRadius: 5,
-                    padding: 10,
-                  }}
-                  placeholder="New nickname"
-                  value={newNickname}
-                  onChangeText={setNewNickname}
-                  autoCapitalize="words"
-                />
-                <Pressable
-                  onPress={updateNickname}
-                  style={{
-                    padding: 10,
-                    backgroundColor: '#999',
-                    borderRadius: 5,
-                  }}
-                >
-                  <Text style={{ color: 'white', textAlign: 'center', fontSize: 14 }}>Save</Text>
-                </Pressable>
-                <Pressable
-                  onPress={() => {
-                    setEditingNickname(false);
-                    setNewNickname(myNickname);
-                  }}
-                  style={{
-                    padding: 10,
-                    backgroundColor: '#999',
-                    borderRadius: 5,
-                  }}
-                >
-                  <Text style={{ color: 'white', textAlign: 'center', fontSize: 14 }}>Cancel</Text>
-                </Pressable>
-              </View>
-            ) : (
-              <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
-                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 15 }}>
+          {/* Home button */}
+          <Pressable
+            onPress={() => router.push('/calendar')}
+            style={{
+              padding: 10,
+              justifyContent: 'center',
+              alignItems: 'center',
+            }}
+          >
+            <Text style={{ fontSize: 24, color: '#666' }}>⌂</Text>
+          </Pressable>
+        </View>
+
+        <ScrollView 
+          style={{ flex: 1, padding: 20, paddingBottom: 40 }} 
+          showsVerticalScrollIndicator={false}
+          keyboardShouldPersistTaps="handled"
+          contentContainerStyle={{ paddingBottom: 100 }}
+        >
+          {/* Section 1: Your Profile */}
+          <View style={{ 
+            backgroundColor: 'white', 
+            borderRadius: 15, 
+            padding: 20, 
+            marginBottom: 20,
+            shadowColor: '#000',
+            shadowOffset: { width: 0, height: 2 },
+            shadowOpacity: 0.1,
+            shadowRadius: 8,
+            elevation: 4,
+          }}>
+            <Text style={{ fontSize: 20, fontWeight: 'bold', marginBottom: 20, color: '#333' }}>
+              Your Profile
+            </Text>
+            
+            {/* Nickname */}
+            <View style={{ marginBottom: 20 }}>
+              {editingNickname ? (
+                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
                   <Text style={{ fontSize: 16, fontWeight: '600', color: '#555', minWidth: 80 }}>
                     Nickname
                   </Text>
-                  <Text style={{ fontSize: 16, color: '#333' }}>
-                    {myNickname || 'No nickname set'}
-                  </Text>
+                  <TextInput
+                    style={{
+                      flex: 1,
+                      borderWidth: 1,
+                      borderColor: '#ccc',
+                      borderRadius: 5,
+                      padding: 10,
+                    }}
+                    placeholder="New nickname"
+                    value={newNickname}
+                    onChangeText={setNewNickname}
+                    autoCapitalize="words"
+                  />
+                  <Pressable
+                    onPress={updateNickname}
+                    style={{
+                      padding: 10,
+                      backgroundColor: '#999',
+                      borderRadius: 5,
+                    }}
+                  >
+                    <Text style={{ color: 'white', textAlign: 'center', fontSize: 14 }}>Save</Text>
+                  </Pressable>
+                  <Pressable
+                    onPress={() => {
+                      setEditingNickname(false);
+                      setNewNickname(myNickname);
+                    }}
+                    style={{
+                      padding: 10,
+                      backgroundColor: '#999',
+                      borderRadius: 5,
+                    }}
+                  >
+                    <Text style={{ color: 'white', textAlign: 'center', fontSize: 14 }}>Cancel</Text>
+                  </Pressable>
                 </View>
+              ) : (
+                <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
+                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: 15 }}>
+                    <Text style={{ fontSize: 16, fontWeight: '600', color: '#555', minWidth: 80 }}>
+                      Nickname
+                    </Text>
+                    <Text style={{ fontSize: 16, color: '#333' }}>
+                      {myNickname || 'No nickname set'}
+                    </Text>
+                  </View>
+                  <Pressable
+                    onPress={() => setEditingNickname(true)}
+                    style={{
+                      padding: 10,
+                      backgroundColor: '#999',
+                      borderRadius: 5,
+                    }}
+                  >
+                    <Text style={{ color: 'white', textAlign: 'center', fontSize: 14 }}>Edit</Text>
+                  </Pressable>
+                </View>
+              )}
+            </View>
+
+            {/* Email */}
+            <View style={{ marginBottom: 20 }}>
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 15 }}>
+                <Text style={{ fontSize: 16, fontWeight: '600', color: '#555', minWidth: 80 }}>
+                  Email
+                </Text>
+                <Text style={{ fontSize: 16, color: '#666' }}>
+                  {myEmail}
+                </Text>
+              </View>
+            </View>
+
+            {/* Password */}
+            <View style={{ marginBottom: 20 }}>
+              <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
+                <Text style={{ fontSize: 16, fontWeight: '600', color: '#555' }}>
+                  Password
+                </Text>
+              </View>
+              
+              {/* Change Password Section */}
+              <View style={{ marginTop: 10 }}>
+                
+                {/* Current Password */}
+                <View style={{ marginBottom: 10 }}>
+                  <Text style={{ fontSize: 12, color: '#666', marginBottom: 5 }}>
+                    Enter your current password to verify your identity
+                  </Text>
+                  <View style={{ flexDirection: 'row', alignItems: 'center', borderWidth: 1, borderColor: '#ccc', borderRadius: 5 }}>
+                    <TextInput
+                      style={{
+                        flex: 1,
+                        padding: 10,
+                        fontSize: 14,
+                      }}
+                      placeholder="Enter your current password"
+                      value={currentPassword}
+                      onChangeText={setCurrentPassword}
+                      secureTextEntry={!showCurrentPassword}
+                      autoCapitalize="none"
+                    />
+                    <Pressable
+                      onPress={() => setShowCurrentPassword(!showCurrentPassword)}
+                      style={{
+                        padding: 10,
+                      }}
+                    >
+                      <Text style={{ fontSize: 16, color: '#666' }}>
+                        {showCurrentPassword ? 'HIDE' : 'SHOW'}
+                      </Text>
+                    </Pressable>
+                  </View>
+                </View>
+                
+                {/* New Password */}
+                <View style={{ marginBottom: 10 }}>
+                  <View style={{ flexDirection: 'row', alignItems: 'center', borderWidth: 1, borderColor: '#ccc', borderRadius: 5 }}>
+                    <TextInput
+                      style={{
+                        flex: 1,
+                        padding: 10,
+                        fontSize: 14,
+                      }}
+                      placeholder="New password"
+                      value={newPassword}
+                      onChangeText={setNewPassword}
+                      secureTextEntry={!showNewPassword}
+                      autoCapitalize="none"
+                    />
+                    <Pressable
+                      onPress={() => setShowNewPassword(!showNewPassword)}
+                      style={{
+                        padding: 10,
+                      }}
+                    >
+                      <Text style={{ fontSize: 16, color: '#666' }}>
+                        {showNewPassword ? 'HIDE' : 'SHOW'}
+                      </Text>
+                    </Pressable>
+                  </View>
+                </View>
+                
+                {/* Confirm New Password */}
+                <View style={{ marginBottom: 15 }}>
+                  <View style={{ flexDirection: 'row', alignItems: 'center', borderWidth: 1, borderColor: '#ccc', borderRadius: 5 }}>
+                    <TextInput
+                      style={{
+                        flex: 1,
+                        padding: 10,
+                        fontSize: 14,
+                      }}
+                      placeholder="Confirm new password"
+                      value={confirmPassword}
+                      onChangeText={setConfirmPassword}
+                      secureTextEntry={!showConfirmPassword}
+                      autoCapitalize="none"
+                    />
+                    <Pressable
+                      onPress={() => setShowConfirmPassword(!showConfirmPassword)}
+                      style={{
+                        padding: 10,
+                      }}
+                    >
+                      <Text style={{ fontSize: 16, color: '#666' }}>
+                        {showConfirmPassword ? 'HIDE' : 'SHOW'}
+                      </Text>
+                    </Pressable>
+                  </View>
+                </View>
+                
+                {/* Change Password Button */}
                 <Pressable
-                  onPress={() => setEditingNickname(true)}
+                  onPress={handleChangePassword}
+                  disabled={changingPassword || !currentPassword || !newPassword || !confirmPassword}
                   style={{
                     padding: 10,
-                    backgroundColor: '#999',
+                    backgroundColor: changingPassword || !currentPassword || !newPassword || !confirmPassword ? '#ccc' : '#999',
                     borderRadius: 5,
+                    opacity: changingPassword || !currentPassword || !newPassword || !confirmPassword ? 0.6 : 1,
                   }}
                 >
-                  <Text style={{ color: 'white', textAlign: 'center', fontSize: 14 }}>Edit</Text>
+                  <Text style={{ color: 'white', textAlign: 'center', fontSize: 14 }}>
+                    {changingPassword ? 'Changing...' : 'Change Password'}
+                  </Text>
                 </Pressable>
               </View>
-            )}
-          </View>
-
-          {/* Email */}
-          <View style={{ marginBottom: 20 }}>
-            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 15 }}>
-              <Text style={{ fontSize: 16, fontWeight: '600', color: '#555', minWidth: 80 }}>
-                Email
-              </Text>
-              <Text style={{ fontSize: 16, color: '#666' }}>
-                {myEmail}
-              </Text>
             </View>
-          </View>
 
-          {/* Password */}
-          <View style={{ marginBottom: 20 }}>
-            <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
-              <Text style={{ fontSize: 16, fontWeight: '600', color: '#555' }}>
-                Password
-              </Text>
-            </View>
-            
-            {/* Change Password Section */}
-            <View style={{ marginTop: 10 }}>
-              
-              {/* Current Password */}
-              <View style={{ marginBottom: 10 }}>
-                <Text style={{ fontSize: 12, color: '#666', marginBottom: 5 }}>
-                  Enter your current password to verify your identity
-                </Text>
-                <View style={{ flexDirection: 'row', alignItems: 'center', borderWidth: 1, borderColor: '#ccc', borderRadius: 5 }}>
-                  <TextInput
-                    style={{
-                      flex: 1,
-                      padding: 10,
-                      fontSize: 14,
-                    }}
-                    placeholder="Enter your current password"
-                    value={currentPassword}
-                    onChangeText={setCurrentPassword}
-                    secureTextEntry={!showCurrentPassword}
-                    autoCapitalize="none"
-                  />
-                  <Pressable
-                    onPress={() => setShowCurrentPassword(!showCurrentPassword)}
-                    style={{
-                      padding: 10,
-                    }}
-                  >
-                    <Text style={{ fontSize: 16, color: '#666' }}>
-                      {showCurrentPassword ? 'HIDE' : 'SHOW'}
-                    </Text>
-                  </Pressable>
-                </View>
-              </View>
-              
-              {/* New Password */}
-              <View style={{ marginBottom: 10 }}>
-                <View style={{ flexDirection: 'row', alignItems: 'center', borderWidth: 1, borderColor: '#ccc', borderRadius: 5 }}>
-                  <TextInput
-                    style={{
-                      flex: 1,
-                      padding: 10,
-                      fontSize: 14,
-                    }}
-                    placeholder="New password"
-                    value={newPassword}
-                    onChangeText={setNewPassword}
-                    secureTextEntry={!showNewPassword}
-                    autoCapitalize="none"
-                  />
-                  <Pressable
-                    onPress={() => setShowNewPassword(!showNewPassword)}
-                    style={{
-                      padding: 10,
-                    }}
-                  >
-                    <Text style={{ fontSize: 16, color: '#666' }}>
-                      {showNewPassword ? 'HIDE' : 'SHOW'}
-                    </Text>
-                  </Pressable>
-                </View>
-              </View>
-              
-              {/* Confirm New Password */}
-              <View style={{ marginBottom: 15 }}>
-                <View style={{ flexDirection: 'row', alignItems: 'center', borderWidth: 1, borderColor: '#ccc', borderRadius: 5 }}>
-                  <TextInput
-                    style={{
-                      flex: 1,
-                      padding: 10,
-                      fontSize: 14,
-                    }}
-                    placeholder="Confirm new password"
-                    value={confirmPassword}
-                    onChangeText={setConfirmPassword}
-                    secureTextEntry={!showConfirmPassword}
-                    autoCapitalize="none"
-                  />
-                  <Pressable
-                    onPress={() => setShowConfirmPassword(!showConfirmPassword)}
-                    style={{
-                      padding: 10,
-                    }}
-                  >
-                    <Text style={{ fontSize: 16, color: '#666' }}>
-                      {showConfirmPassword ? 'HIDE' : 'SHOW'}
-                    </Text>
-                  </Pressable>
-                </View>
-              </View>
-              
-              {/* Change Password Button */}
-              <Pressable
-                onPress={handleChangePassword}
-                disabled={changingPassword || !currentPassword || !newPassword || !confirmPassword}
-                style={{
-                  padding: 10,
-                  backgroundColor: changingPassword || !currentPassword || !newPassword || !confirmPassword ? '#ccc' : '#999',
-                  borderRadius: 5,
-                  opacity: changingPassword || !currentPassword || !newPassword || !confirmPassword ? 0.6 : 1,
-                }}
-              >
-                <Text style={{ color: 'white', textAlign: 'center', fontSize: 14 }}>
-                  {changingPassword ? 'Changing...' : 'Change Password'}
-                </Text>
-              </Pressable>
-            </View>
-          </View>
-
-          {/* Account Actions */}
-          <View>
-            <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 }}>
-              <Text style={{ fontSize: 16, fontWeight: '600', color: '#555' }}>
-                Account Actions
-              </Text>
-            </View>
-            
-            {/* Sign Out */}
-            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 15, marginBottom: 10 }}>
-              <Pressable
-                onPress={handleSignOut}
-                style={{
-                  padding: 10,
-                  backgroundColor: '#999',
-                  borderRadius: 5,
-                  minWidth: 120,
-                }}
-              >
-                <Text style={{ color: 'white', textAlign: 'center', fontSize: 14 }}>Sign Out</Text>
-              </Pressable>
-              <Text style={{ fontSize: 12, color: '#666', flex: 1 }}>
-                Sign out of your account. You can sign back in anytime.
-              </Text>
-            </View>
-            
-            {/* Delete Account */}
-            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 15 }}>
-              <Pressable
-                onPress={handleDeleteAccount}
-                style={{
-                  padding: 10,
-                  backgroundColor: '#999',
-                  borderWidth: 3,
-                  borderColor: '#ff4444',
-                  borderRadius: 5,
-                  minWidth: 120,
-                }}
-              >
-                <Text style={{ color: 'white', textAlign: 'center', fontSize: 14 }}>Delete Account</Text>
-              </Pressable>
-              <Text style={{ fontSize: 12, color: '#666', flex: 1 }}>
-                Permanently delete your account and all data. This action cannot be undone.
-              </Text>
-            </View>
-          </View>
-        </View>
-
-        {/* Section 2: Linking with Partner */}
-        <View style={{ 
-          backgroundColor: 'white', 
-          borderRadius: 15, 
-          padding: 20,
-          shadowColor: '#000',
-          shadowOffset: { width: 0, height: 2 },
-          shadowOpacity: 0.1,
-          shadowRadius: 8,
-          elevation: 4,
-        }}>
-          <Text style={{ fontSize: 20, fontWeight: 'bold', marginBottom: 20, color: '#333' }}>
-            Linking with Partner
-          </Text>
-          
-          {/* Secret Code */}
-          <View style={{ marginBottom: 20 }}>
-            <Text style={{ fontSize: 16, fontWeight: '600', marginBottom: 10, color: '#555' }}>
-              Your Secret Code
-            </Text>
-            {mySecretCode ? (
-              <View style={{ alignItems: 'center' }}>
-                <Text style={{ fontSize: 24, fontFamily: 'monospace', letterSpacing: 2, marginBottom: 10 }}>
-                  {mySecretCode}
-                </Text>
-                <Text style={{ fontSize: 12, textAlign: 'center', color: '#666' }}>
-                  Share this code with your partner
-                </Text>
-              </View>
-            ) : (
-              <Pressable
-                onPress={createSecretCode}
-                disabled={generatingSecretCode}
-                style={{
-                  padding: 10,
-                  backgroundColor: generatingSecretCode ? '#ccc' : '#999',
-                  borderRadius: 5,
-                  opacity: generatingSecretCode ? 0.6 : 1,
-                }}
-              >
-                <Text style={{ color: 'white', textAlign: 'center', fontSize: 14 }}>
-                  {generatingSecretCode ? 'Creating...' : 'Create Secret Code'}
-                </Text>
-              </Pressable>
-            )}
-          </View>
-
-          {currentPartner ? (
-            // When linked: show partner status and action buttons
-            <>
-              {/* Partner Status */}
-              <View style={{ marginBottom: 20 }}>
-                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 15 }}>
-                  <Text style={{ fontSize: 16, fontWeight: '600', color: '#555', minWidth: 80 }}>
-                    Partner Status
-                  </Text>
-                  <Text style={{ fontSize: 16, color: '#333' }}>
-                    You are linked with {partnerNickname}
-                  </Text>
-                </View>
-              </View>
-
-              {/* Partner Actions */}
-              <View style={{ marginBottom: 20 }}>
-                <Text style={{ fontSize: 16, fontWeight: '600', marginBottom: 10, color: '#555' }}>
-                  Partner Actions
-                </Text>
-                
-                {/* Unlink Partner */}
-                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 15, marginBottom: 10 }}>
-                  <Pressable
-                    onPress={unlinkPartner}
-                    disabled={generatingSecretCode}
-                    style={{
-                      padding: 10,
-                      backgroundColor: generatingSecretCode ? '#ccc' : '#999',
-                      borderWidth: 3,
-                      borderColor: '#ff4444',
-                      borderRadius: 5,
-                      opacity: generatingSecretCode ? 0.6 : 1,
-                      minWidth: 120,
-                    }}
-                  >
-                    <Text style={{ color: 'white', textAlign: 'center', fontSize: 14 }}>Unlink Partner</Text>
-                  </Pressable>
-                  <Text style={{ fontSize: 12, color: '#666', flex: 1 }}>
-                    You and your partner will be unlinked from each other, but they may still be able to link with you again with your secret code.
-                  </Text>
-                </View>
-                
-                {/* Generate New Secret Code */}
-                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 15 }}>
-                  <Pressable
-                    onPress={generateNewSecretCode}
-                    disabled={generatingSecretCode}
-                    style={{
-                      padding: 10,
-                      backgroundColor: generatingSecretCode ? '#ccc' : '#999',
-                      borderWidth: 3,
-                      borderColor: '#ff4444',
-                      borderRadius: 5,
-                      opacity: generatingSecretCode ? 0.6 : 1,
-                      minWidth: 120,
-                    }}
-                  >
-                    <Text style={{ color: 'white', textAlign: 'center', fontSize: 14 }}>
-                      {generatingSecretCode ? 'Generating...' : 'Regenerate Secret Code'}
-                    </Text>
-                  </Pressable>
-                  <Text style={{ fontSize: 12, color: '#666', flex: 1 }}>
-                    This will automatically unlink you from your partner and prevent them from accessing your data.
-                  </Text>
-                </View>
-              </View>
-            </>
-          ) : (
-            // When not linked: show link partner input
+            {/* Account Actions */}
             <View>
               <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 }}>
                 <Text style={{ fontSize: 16, fontWeight: '600', color: '#555' }}>
-                  Link with Partner
+                  Account Actions
                 </Text>
               </View>
-              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 15 }}>
-                <TextInput
-                  style={{
-                    flex: 1,
-                    borderWidth: 1,
-                    borderColor: '#ccc',
-                    borderRadius: 5,
-                    padding: 10,
-                    textAlign: 'center',
-                    fontFamily: 'monospace',
-                    letterSpacing: 1,
-                  }}
-                  placeholder="Enter partner's secret code"
-                  value={partnerSecretCode}
-                  onChangeText={setpartnerSecretCode}
-                  autoCapitalize="characters"
-                />
-                
+              
+              {/* Sign Out */}
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 15, marginBottom: 10 }}>
                 <Pressable
-                  onPress={linkPartner}
+                  onPress={handleSignOut}
                   style={{
                     padding: 10,
                     backgroundColor: '#999',
@@ -844,13 +674,244 @@ export default function CouplePage() {
                     minWidth: 120,
                   }}
                 >
-                  <Text style={{ color: 'white', textAlign: 'center', fontSize: 14 }}>Link Partner</Text>
+                  <Text style={{ color: 'white', textAlign: 'center', fontSize: 14 }}>Sign Out</Text>
                 </Pressable>
+                <Text style={{ fontSize: 12, color: '#666', flex: 1 }}>
+                  Sign out of your account. You can sign back in anytime.
+                </Text>
+              </View>
+              
+              {/* Delete Account */}
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 15 }}>
+                <Pressable
+                  onPress={handleDeleteAccount}
+                  style={{
+                    padding: 10,
+                    backgroundColor: '#999',
+                    borderWidth: 3,
+                    borderColor: '#ff4444',
+                    borderRadius: 5,
+                    minWidth: 120,
+                  }}
+                >
+                  <Text style={{ color: 'white', textAlign: 'center', fontSize: 14 }}>Delete Account</Text>
+                </Pressable>
+                <Text style={{ fontSize: 12, color: '#666', flex: 1 }}>
+                  Permanently delete your account and all data. This action cannot be undone.
+                </Text>
               </View>
             </View>
-          )}
-        </View>
-      </ScrollView>
-    </View>
+          </View>
+
+          {/* Section 2: Linking with Partner */}
+          <View style={{ 
+            backgroundColor: 'white', 
+            borderRadius: 15, 
+            padding: 20,
+            shadowColor: '#000',
+            shadowOffset: { width: 0, height: 2 },
+            shadowOpacity: 0.1,
+            shadowRadius: 8,
+            elevation: 4,
+          }}>
+            <Text style={{ fontSize: 20, fontWeight: 'bold', marginBottom: 20, color: '#333' }}>
+              Linking with Partner
+            </Text>
+            
+            {/* Secret Code */}
+            <View style={{ marginBottom: 20 }}>
+              <Text style={{ fontSize: 16, fontWeight: '600', marginBottom: 10, color: '#555' }}>
+                Your Secret Code
+              </Text>
+              {mySecretCode ? (
+                <View style={{ alignItems: 'center' }}>
+                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10, marginBottom: 10 }}>
+                    <Text style={{ fontSize: 24, fontFamily: 'monospace', letterSpacing: 2 }}>
+                      {mySecretCode}
+                    </Text>
+                    <Pressable
+                      onPress={copySecretCode}
+                      style={{
+                        padding: 8,
+                        backgroundColor: '#999',
+                        borderRadius: 5,
+                      }}
+                    >
+                      <Text style={{ color: 'white', fontSize: 12 }}>Copy</Text>
+                    </Pressable>
+                  </View>
+                  <Text style={{ fontSize: 12, textAlign: 'center', color: '#666' }}>
+                    Share this code with your partner
+                  </Text>
+                </View>
+              ) : (
+                <Pressable
+                  onPress={createSecretCode}
+                  disabled={generatingSecretCode}
+                  style={{
+                    padding: 10,
+                    backgroundColor: generatingSecretCode ? '#ccc' : '#999',
+                    borderRadius: 5,
+                    opacity: generatingSecretCode ? 0.6 : 1,
+                  }}
+                >
+                  <Text style={{ color: 'white', textAlign: 'center', fontSize: 14 }}>
+                    {generatingSecretCode ? 'Creating...' : 'Create Secret Code'}
+                  </Text>
+                </Pressable>
+              )}
+            </View>
+
+            {currentPartner ? (
+              // When linked: show partner status and action buttons
+              <>
+                {/* Partner Status */}
+                <View style={{ marginBottom: 20 }}>
+                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: 15 }}>
+                    <Text style={{ fontSize: 16, fontWeight: '600', color: '#555', minWidth: 80 }}>
+                      Partner Status
+                    </Text>
+                    <Text style={{ fontSize: 16, color: '#333' }}>
+                      You are linked with {partnerNickname}
+                    </Text>
+                  </View>
+                </View>
+
+                {/* Partner Actions */}
+                <View style={{ marginBottom: 20 }}>
+                  <Text style={{ fontSize: 16, fontWeight: '600', marginBottom: 10, color: '#555' }}>
+                    Partner Actions
+                  </Text>
+                  
+                  {/* Unlink Partner */}
+                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: 15, marginBottom: 10 }}>
+                    <Pressable
+                      onPress={unlinkPartner}
+                      disabled={generatingSecretCode}
+                      style={{
+                        padding: 10,
+                        backgroundColor: generatingSecretCode ? '#ccc' : '#999',
+                        borderWidth: 3,
+                        borderColor: '#ff4444',
+                        borderRadius: 5,
+                        opacity: generatingSecretCode ? 0.6 : 1,
+                        minWidth: 120,
+                      }}
+                    >
+                      <Text style={{ color: 'white', textAlign: 'center', fontSize: 14 }}>Unlink Partner</Text>
+                    </Pressable>
+                    <Text style={{ fontSize: 12, color: '#666', flex: 1 }}>
+                      You and your partner will be unlinked from each other, but they may still be able to link with you again with your secret code.
+                    </Text>
+                  </View>
+                  
+                  {/* Generate New Secret Code */}
+                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: 15 }}>
+                    <Pressable
+                      onPress={generateNewSecretCode}
+                      disabled={generatingSecretCode}
+                      style={{
+                        padding: 10,
+                        backgroundColor: generatingSecretCode ? '#ccc' : '#999',
+                        borderWidth: 3,
+                        borderColor: '#ff4444',
+                        borderRadius: 5,
+                        opacity: generatingSecretCode ? 0.6 : 1,
+                        minWidth: 120,
+                      }}
+                    >
+                      <Text style={{ color: 'white', textAlign: 'center', fontSize: 14 }}>
+                        {generatingSecretCode ? 'Generating...' : 'Regenerate Secret Code'}
+                      </Text>
+                    </Pressable>
+                    <Text style={{ fontSize: 12, color: '#666', flex: 1 }}>
+                      This will automatically unlink you from your partner and prevent them from accessing your data.
+                    </Text>
+                  </View>
+                </View>
+              </>
+            ) : (
+              // When not linked: show link partner input
+              <View>
+                <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 }}>
+                  <Text style={{ fontSize: 16, fontWeight: '600', color: '#555' }}>
+                    Link with Partner
+                  </Text>
+                </View>
+                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 15 }}>
+                  <TextInput
+                    style={{
+                      flex: 1,
+                      borderWidth: 1,
+                      borderColor: '#ccc',
+                      borderRadius: 5,
+                      padding: 10,
+                      textAlign: 'center',
+                      fontFamily: 'monospace',
+                      letterSpacing: 1,
+                    }}
+                    placeholder="Enter partner's secret code"
+                    value={partnerSecretCode}
+                    onChangeText={setpartnerSecretCode}
+                    autoCapitalize="characters"
+                  />
+                  
+                  <Pressable
+                    onPress={linkPartner}
+                    style={{
+                      padding: 10,
+                      backgroundColor: '#999',
+                      borderRadius: 5,
+                      minWidth: 120,
+                    }}
+                  >
+                    <Text style={{ color: 'white', textAlign: 'center', fontSize: 14 }}>Link Partner</Text>
+                  </Pressable>
+                </View>
+              </View>
+            )}
+          </View>
+        </ScrollView>
+        
+        {/* Notification Modal */}
+        <Modal
+          visible={showModal}
+          transparent={true}
+          animationType="fade"
+          onRequestClose={() => setShowModal(false)}
+        >
+          <View style={{
+            flex: 1,
+            justifyContent: 'center',
+            alignItems: 'center',
+            backgroundColor: 'rgba(0, 0, 0, 0.5)',
+          }}>
+            <View style={{
+              backgroundColor: notification.includes('Error') ? '#ffebee' : '#e8f5e8',
+              padding: 15,
+              borderRadius: 8,
+              margin: 20,
+              border: notification.includes('Error') ? '1px solid #f44336' : '1px solid #4caf50',
+              shadowColor: '#000',
+              shadowOffset: { width: 0, height: 2 },
+              shadowOpacity: 0.1,
+              shadowRadius: 4,
+              elevation: 4,
+              minWidth: 200,
+              maxWidth: 300,
+            }}>
+              <Text style={{
+                color: notification.includes('Error') ? '#d32f2f' : '#2e7d32',
+                textAlign: 'center',
+                fontSize: 16,
+                fontWeight: '600',
+              }}>
+                {notification.replace(/^(Success|Error): /, '')}
+              </Text>
+            </View>
+          </View>
+        </Modal>
+      </View>
+    </KeyboardAvoidingView>
   );
 } 
