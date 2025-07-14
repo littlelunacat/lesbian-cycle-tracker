@@ -475,7 +475,7 @@ export default function CalendarPage() {
               fontWeight: 'bold',
               textAlign: 'center',
             }}>
-              bloody
+              Bloody
             </Text>
           </Pressable>
           <Pressable
@@ -503,7 +503,7 @@ export default function CalendarPage() {
               fontWeight: 'bold',
               textAlign: 'center',
             }}>
-              sexy
+              Sexy
             </Text>
           </Pressable>
         </View>
