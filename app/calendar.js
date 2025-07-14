@@ -386,6 +386,23 @@ export default function CalendarPage() {
             }}
           />
         </View>
+        
+        {/* Credits */}
+        <View style={{ 
+          padding: 20, 
+          alignItems: 'center',
+          borderTopWidth: 1,
+          borderTopColor: '#e0e0e0',
+          backgroundColor: 'white'
+        }}>
+          <Text style={{ 
+            fontSize: 12, 
+            color: '#999',
+            textAlign: 'center'
+          }}>
+            This app is developed proudly by Luna and Cat.
+          </Text>
+        </View>
       </View>
     </View>
   );

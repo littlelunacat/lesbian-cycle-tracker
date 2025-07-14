@@ -1,50 +1,57 @@
-# Welcome to your Expo app 👋
+# Lesbian Cycle Tracker App! 🌸
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+Hey everyone! 👋
 
-## Get started
+I noticed there wasn't a simple, private way for lesbian couples to track their periods together—so I built this cycle tracker app that lets you and your partner sync up your cycles! 💕
+
+🔗 Try it here: [Lesbian Cycle Tracker](https://lesbian-cycle-tracker-f4f1e.web.app)
+
+## What it does:
+- **Private & Secure**: Your data stays between you and your partner
+- **Partner Linking**: Connect with your partner using secret codes
+- **Shared Calendar**: See both your cycles on one calendar
+- **Easy Tracking**: Just tap dates to mark your periods
+- **Nickname Support**: Use nicknames instead of emails for privacy
+
+It's completely free to use, and I'd love to get feedback from the community. If you have suggestions for new features or improvements, let me know! Would also appreciate any help spreading the word if you find it useful. 😊
+
+Happy tracking! 🌙✨
+
+---
+
+## For Developers
+
+This is an [Expo](https://expo.dev) project built with React Native and Firebase.
+
+### Get started
 
 1. Install dependencies
-
    ```bash
    npm install
    ```
 
 2. Start the app
-
    ```bash
    npx expo start
    ```
 
-In the output, you'll find options to open the app in a
+3. Build for web
+   ```bash
+   npm run build
+   ```
 
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
+4. Deploy to Firebase
+   ```bash
+   firebase deploy
+   ```
 
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
+### Tech Stack
+- **Frontend**: React Native with Expo Router
+- **Backend**: Firebase Firestore
+- **Authentication**: Firebase Auth
+- **Hosting**: Firebase Hosting
+- **Calendar**: react-native-calendars
 
-## Get a fresh project
+---
 
-When you're ready, run:
-
-```bash
-npm run reset-project
-```
-
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
-
-## Learn more
-
-To learn more about developing your project with Expo, look at the following resources:
-
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
-
-## Join the community
-
-Join our community of developers creating universal apps.
-
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+*This app is developed proudly by Luna and Cat.*
