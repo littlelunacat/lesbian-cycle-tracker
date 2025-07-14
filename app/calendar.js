@@ -393,7 +393,7 @@ export default function CalendarPage() {
           alignItems: 'center',
           borderTopWidth: 1,
           borderTopColor: '#e0e0e0',
-          backgroundColor: 'white'
+          backgroundColor: 'transparent'
         }}>
           <Text style={{ 
             fontSize: 12, 
