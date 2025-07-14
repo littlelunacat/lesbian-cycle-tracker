@@ -374,7 +374,7 @@ export default function CalendarPage() {
               todayTextColor: 'purple',
               dayTextColor: '#333',
               textDisabledColor: '#d9e1e8',
-              arrowColor: '#666',
+              arrowColor: '#333',
               monthTextColor: '#333',
               indicatorColor: 'purple',
               textDayFontWeight: '300',
