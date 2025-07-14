@@ -822,7 +822,7 @@ export default function CouplePage() {
                       </Text>
                     </Pressable>
                     <Text style={{ fontSize: 12, color: '#666', flex: 1 }}>
-                      This will automatically unlink you from your partner and prevent them from accessing your data.
+                      This will automatically unlink you from your partner and prevent them from linking with you again.
                     </Text>
                   </View>
                 </View>

@@ -365,6 +365,8 @@ export default function CalendarPage() {
             onDayPress={onDayPress} 
             markedDates={combinedDates}
             dayComponent={CustomDay}
+            enableSwipeMonths={true}
+            hideExtraDays={false}
             theme={{
               backgroundColor: 'transparent',
               calendarBackground: 'transparent',
@@ -374,7 +376,7 @@ export default function CalendarPage() {
               todayTextColor: 'purple',
               dayTextColor: '#333',
               textDisabledColor: '#d9e1e8',
-              arrowColor: '#000',
+              arrowColor: '#000000',
               monthTextColor: '#333',
               indicatorColor: 'purple',
               textDayFontWeight: '300',
@@ -383,6 +385,14 @@ export default function CalendarPage() {
               textDayFontSize: 16,
               textMonthFontSize: 18,
               textDayHeaderFontSize: 14,
+              'stylesheet.calendar.header': {
+                dayHeader: {
+                  color: '#333',
+                },
+                arrow: {
+                  color: '#000000',
+                },
+              },
             }}
           />
         </View>
