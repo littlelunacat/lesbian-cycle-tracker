@@ -1,4 +1,4 @@
-# Lesbian Cycle Tracker App! 🌸
+# Lesbian Cycle Tracker App! 👩‍❤️‍💋‍👩
 
 Hey everyone! 👋
 
@@ -11,7 +11,6 @@ I noticed there wasn't a simple, private way for lesbian couples to track their 
 - **Partner Linking**: Connect with your partner using secret codes
 - **Shared Calendar**: See both your cycles on one calendar
 - **Easy Tracking**: Just tap dates to mark your periods
-- **Nickname Support**: Use nicknames instead of emails for privacy
 
 It's completely free to use, and I'd love to get feedback from the community. If you have suggestions for new features or improvements, let me know! Would also appreciate any help spreading the word if you find it useful. 😊
 
