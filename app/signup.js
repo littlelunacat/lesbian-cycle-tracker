@@ -107,33 +107,33 @@ export default function Signup() {
           Sign Up
         </Text>
 
-                  <TextInput
-            style={styles.input}
-            placeholder="Email"
-            placeholderTextColor={isDark ? '#888888' : '#999999'}
-            value={email}
-            onChangeText={setEmail}
-            keyboardType="email-address"
-            autoCapitalize="none"
-          />
+        <TextInput
+          style={styles.input}
+          placeholder="Email"
+          placeholderTextColor={isDark ? '#888888' : '#999999'}
+          value={email}
+          onChangeText={setEmail}
+          keyboardType="email-address"
+          autoCapitalize="none"
+        />
 
-          <TextInput
-            style={styles.input}
-            placeholder="Nickname (can be changed later)"
-            placeholderTextColor={isDark ? '#888888' : '#999999'}
-            value={nickname}
-            onChangeText={setNickname}
-            autoCapitalize="words"
-          />
+        <TextInput
+          style={styles.input}
+          placeholder="Nickname (can be changed later)"
+          placeholderTextColor={isDark ? '#888888' : '#999999'}
+          value={nickname}
+          onChangeText={setNickname}
+          autoCapitalize="words"
+        />
 
-          <TextInput
-            style={styles.input}
-            placeholder="Password"
-            placeholderTextColor={isDark ? '#888888' : '#999999'}
-            value={password}
-            onChangeText={setPassword}
-            secureTextEntry
-          />
+        <TextInput
+          style={styles.input}
+          placeholder="Password"
+          placeholderTextColor={isDark ? '#888888' : '#999999'}
+          value={password}
+          onChangeText={setPassword}
+          secureTextEntry
+        />
 
         <Pressable
           onPress={handleSignup}

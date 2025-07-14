@@ -112,7 +112,7 @@ export default function Login() {
         });
         showNotification('Success', 'Account created successfully!');
       } else {
-        await signInWithEmailAndPassword(auth, email, password);
+      await signInWithEmailAndPassword(auth, email, password);
         showNotification('Success', 'Logged in successfully!');
       }
       router.replace('/');
@@ -190,14 +190,14 @@ export default function Login() {
           </View>
         ) : null}
 
-        <TextInput
+      <TextInput
           style={styles.input}
-          placeholder="Email"
+        placeholder="Email"
           placeholderTextColor={isDark ? '#888888' : '#999999'}
-          value={email}
-          onChangeText={setEmail}
-          keyboardType="email-address"
-          autoCapitalize="none"
+        value={email}
+        onChangeText={setEmail}
+        keyboardType="email-address"
+        autoCapitalize="none"
         />
 
         {isSignup && (
@@ -211,13 +211,13 @@ export default function Login() {
           />
         )}
 
-        <TextInput
+      <TextInput
           style={styles.input}
-          placeholder="Password"
+        placeholder="Password"
           placeholderTextColor={isDark ? '#888888' : '#999999'}
-          value={password}
-          onChangeText={setPassword}
-          secureTextEntry
+        value={password}
+        onChangeText={setPassword}
+        secureTextEntry
         />
 
         <Pressable
@@ -251,9 +251,9 @@ export default function Login() {
               <Text style={[styles.linkText, { opacity: resettingPassword ? 0.6 : 1 }]}>
                 {resettingPassword ? 'Sending...' : 'Forgot Password?'}
               </Text>
-            </Pressable>
+      </Pressable>
           )}
-        </View>
+    </View>
       </ScrollView>
     </KeyboardAvoidingView>
   );
