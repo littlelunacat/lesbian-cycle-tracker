@@ -1,4 +1,3 @@
-import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { collection, doc, getDoc, getDocs, query, setDoc, where } from 'firebase/firestore';
 import { useEffect, useState } from 'react';
@@ -279,7 +278,7 @@ export default function CalendarPage() {
             alignItems: 'center',
           }}
         >
-          <Ionicons name="menu" size={24} color="#666" />
+          <Text style={{ fontSize: 20, color: '#666', fontWeight: 'bold' }}>⋮</Text>
         </Pressable>
       </View>
 

@@ -1,4 +1,3 @@
-import { Ionicons } from '@expo/vector-icons';
 import * as Clipboard from 'expo-clipboard';
 import { useRouter } from 'expo-router';
 import { EmailAuthProvider, reauthenticateWithCredential, sendPasswordResetEmail, updatePassword } from 'firebase/auth';
@@ -448,7 +447,7 @@ export default function CouplePage() {
               alignItems: 'center',
             }}
           >
-            <Ionicons name="home" size={24} color="#666" />
+            <Text style={{ fontSize: 20, color: '#666', fontWeight: 'bold' }}>⌂</Text>
           </Pressable>
         </View>
 
