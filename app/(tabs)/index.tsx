@@ -1,5 +1,5 @@
-import { Redirect } from 'expo-router';
+import CalendarPage from '../calendar';
 
 export default function TabIndex() {
-  return <Redirect href="/calendar" />;
+  return <CalendarPage />;
 }

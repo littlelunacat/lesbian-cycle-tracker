@@ -62,6 +62,11 @@ export default function CouplePage() {
         const data = docSnap.data();
         if (data.secretCode) {
           setMySecretCode(data.secretCode);
+        } else {
+          // Automatically generate secret code if user doesn't have one
+          const secretCode = generateSecretCode();
+          await setDoc(userDoc, { secretCode: secretCode }, { merge: true });
+          setMySecretCode(secretCode);
         }
         if (data.nickname) {
           setMyNickname(data.nickname);
@@ -77,6 +82,15 @@ export default function CouplePage() {
             setPartnerNickname(partnerData.nickname || 'Unknown');
           }
         }
+      } else {
+        // User document doesn't exist, create it with a secret code
+        const secretCode = generateSecretCode();
+        await setDoc(userDoc, { 
+          email: user.email,
+          secretCode: secretCode,
+          createdAt: new Date()
+        });
+        setMySecretCode(secretCode);
       }
     } catch (error) {
       console.error('Error loading data:', error);
@@ -426,7 +440,7 @@ export default function CouplePage() {
           
           {/* Home button */}
           <Pressable
-            onPress={() => router.push('/calendar')}
+            onPress={() => router.push('/')}
             style={{
               padding: 10,
               justifyContent: 'center',
@@ -723,43 +737,26 @@ export default function CouplePage() {
               <Text style={{ fontSize: 16, fontWeight: '600', marginBottom: 10, color: '#555' }}>
                 Your Secret Code
               </Text>
-              {mySecretCode ? (
-                <View style={{ alignItems: 'center' }}>
-                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10, marginBottom: 10 }}>
-                    <Text style={{ fontSize: 24, fontFamily: 'monospace', letterSpacing: 2 }}>
-                      {mySecretCode}
-                    </Text>
-                    <Pressable
-                      onPress={copySecretCode}
-                      style={{
-                        padding: 8,
-                        backgroundColor: '#999',
-                        borderRadius: 5,
-                      }}
-                    >
-                      <Text style={{ color: 'white', fontSize: 12 }}>Copy</Text>
-                    </Pressable>
-                  </View>
-                  <Text style={{ fontSize: 12, textAlign: 'center', color: '#666' }}>
-                    Share this code with your partner
+              <View style={{ alignItems: 'center' }}>
+                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10, marginBottom: 10 }}>
+                  <Text style={{ fontSize: 24, fontFamily: 'monospace', letterSpacing: 2 }}>
+                    {mySecretCode || 'Loading...'}
                   </Text>
+                  <Pressable
+                    onPress={copySecretCode}
+                    style={{
+                      padding: 8,
+                      backgroundColor: '#999',
+                      borderRadius: 5,
+                    }}
+                  >
+                    <Text style={{ color: 'white', fontSize: 12 }}>Copy</Text>
+                  </Pressable>
                 </View>
-              ) : (
-                <Pressable
-                  onPress={createSecretCode}
-                  disabled={generatingSecretCode}
-                  style={{
-                    padding: 10,
-                    backgroundColor: generatingSecretCode ? '#ccc' : '#999',
-                    borderRadius: 5,
-                    opacity: generatingSecretCode ? 0.6 : 1,
-                  }}
-                >
-                  <Text style={{ color: 'white', textAlign: 'center', fontSize: 14 }}>
-                    {generatingSecretCode ? 'Creating...' : 'Create Secret Code'}
-                  </Text>
-                </Pressable>
-              )}
+                <Text style={{ fontSize: 12, textAlign: 'center', color: '#666' }}>
+                  Share this code with your partner
+                </Text>
+              </View>
             </View>
 
             {currentPartner ? (

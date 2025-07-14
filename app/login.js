@@ -2,7 +2,7 @@ import { useRouter } from 'expo-router';
 import { createUserWithEmailAndPassword, sendPasswordResetEmail, signInWithEmailAndPassword } from 'firebase/auth';
 import { doc, setDoc } from 'firebase/firestore';
 import { useState } from 'react';
-import { Pressable, Text, TextInput, View } from 'react-native';
+import { KeyboardAvoidingView, Platform, Pressable, ScrollView, Text, TextInput, View } from 'react-native';
 import { auth, db } from '../firebaseConfig';
 
 export default function Login() {
@@ -57,7 +57,7 @@ export default function Login() {
         await signInWithEmailAndPassword(auth, email, password);
         showNotification('Success', 'Logged in successfully!');
       }
-      router.replace('/calendar');
+      router.replace('/');
     } catch (error) {
       console.error('Auth error:', error);
       let errorMessage = 'Authentication failed. Please try again.';
@@ -107,46 +107,43 @@ export default function Login() {
   };
 
   return (
-    <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', padding: 20 }}>
-      <Text style={{ fontSize: 24, marginBottom: 30 }}>
-        {isSignup ? 'Sign Up' : 'Login'}
-      </Text>
-
-      {notification ? (
-        <View style={{ 
-          backgroundColor: notification.includes('Error') ? '#ffebee' : '#e8f5e8', 
-          padding: 10, 
-          borderRadius: 5, 
-          marginBottom: 20,
-          border: notification.includes('Error') ? '1px solid #f44336' : '1px solid #4caf50',
-          width: '100%',
-        }}>
-          <Text style={{ 
-            color: notification.includes('Error') ? '#d32f2f' : '#2e7d32',
-            textAlign: 'center'
-          }}>
-            {notification}
-          </Text>
-        </View>
-      ) : null}
-
-      <TextInput
-        style={{
-          borderWidth: 1,
-          borderColor: '#ccc',
-          borderRadius: 5,
-          padding: 10,
-          marginBottom: 10,
-          width: '100%',
+    <KeyboardAvoidingView 
+      style={{ flex: 1 }} 
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+    >
+      <ScrollView 
+        contentContainerStyle={{ 
+          flexGrow: 1, 
+          justifyContent: 'center', 
+          alignItems: 'center', 
+          padding: 20,
+          paddingTop: 60,
+          paddingBottom: 60
         }}
-        placeholder="Email"
-        value={email}
-        onChangeText={setEmail}
-        keyboardType="email-address"
-        autoCapitalize="none"
-      />
+        keyboardShouldPersistTaps="handled"
+      >
+        <Text style={{ fontSize: 24, marginBottom: 30 }}>
+          {isSignup ? 'Sign Up' : 'Login'}
+        </Text>
 
-      {isSignup && (
+        {notification ? (
+          <View style={{ 
+            backgroundColor: notification.includes('Error') ? '#ffebee' : '#e8f5e8', 
+            padding: 10, 
+            borderRadius: 5, 
+            marginBottom: 20,
+            border: notification.includes('Error') ? '1px solid #f44336' : '1px solid #4caf50',
+            width: '100%',
+          }}>
+            <Text style={{ 
+              color: notification.includes('Error') ? '#d32f2f' : '#2e7d32',
+              textAlign: 'center'
+            }}>
+              {notification}
+            </Text>
+          </View>
+        ) : null}
+
         <TextInput
           style={{
             borderWidth: 1,
@@ -156,68 +153,86 @@ export default function Login() {
             marginBottom: 10,
             width: '100%',
           }}
-          placeholder="Nickname (can be changed later)"
-          value={nickname}
-          onChangeText={setNickname}
-          autoCapitalize="words"
+          placeholder="Email"
+          value={email}
+          onChangeText={setEmail}
+          keyboardType="email-address"
+          autoCapitalize="none"
         />
-      )}
 
-      <TextInput
-        style={{
-          borderWidth: 1,
-          borderColor: '#ccc',
-          borderRadius: 5,
-          padding: 10,
-          marginBottom: 20,
-          width: '100%',
-        }}
-        placeholder="Password"
-        value={password}
-        onChangeText={setPassword}
-        secureTextEntry
-      />
+        {isSignup && (
+          <TextInput
+            style={{
+              borderWidth: 1,
+              borderColor: '#ccc',
+              borderRadius: 5,
+              padding: 10,
+              marginBottom: 10,
+              width: '100%',
+            }}
+            placeholder="Nickname (can be changed later)"
+            value={nickname}
+            onChangeText={setNickname}
+            autoCapitalize="words"
+          />
+        )}
 
-      <Pressable
-        onPress={handleAuth}
-        disabled={loading}
-        style={{
-          padding: 10,
-          backgroundColor: 'purple',
-          borderRadius: 5,
-          width: '100%',
-          opacity: loading ? 0.6 : 1,
-        }}
-      >
-        <Text style={{ color: 'white', textAlign: 'center' }}>
-          {loading ? 'Loading...' : (isSignup ? 'Sign Up' : 'Login')}
-        </Text>
-      </Pressable>
+        <TextInput
+          style={{
+            borderWidth: 1,
+            borderColor: '#ccc',
+            borderRadius: 5,
+            padding: 10,
+            marginBottom: 20,
+            width: '100%',
+          }}
+          placeholder="Password"
+          value={password}
+          onChangeText={setPassword}
+          secureTextEntry
+        />
 
-      <View style={{ flexDirection: 'row', justifyContent: 'space-between', width: '100%', marginTop: 20 }}>
         <Pressable
-          onPress={() => {
-            setIsSignup(!isSignup);
-            setNickname(''); // Clear nickname when switching modes
-            setNotification(''); // Clear any existing notifications
+          onPress={handleAuth}
+          disabled={loading}
+          style={{
+            padding: 10,
+            backgroundColor: 'purple',
+            borderRadius: 5,
+            width: '100%',
+            opacity: loading ? 0.6 : 1,
           }}
         >
-          <Text style={{ color: 'purple' }}>
-            {isSignup ? 'Already have an account? Login' : 'Need an account? Sign Up'}
+          <Text style={{ color: 'white', textAlign: 'center' }}>
+            {loading ? 'Loading...' : (isSignup ? 'Sign Up' : 'Login')}
           </Text>
         </Pressable>
-        
-        {!isSignup && (
+
+        <View style={{ flexDirection: 'row', justifyContent: 'space-between', width: '100%', marginTop: 20 }}>
           <Pressable
-            onPress={handlePasswordReset}
-            disabled={resettingPassword}
+            onPress={() => {
+              setIsSignup(!isSignup);
+              setNickname(''); // Clear nickname when switching modes
+              setNotification(''); // Clear any existing notifications
+            }}
           >
-            <Text style={{ color: 'purple', opacity: resettingPassword ? 0.6 : 1 }}>
-              {resettingPassword ? 'Sending...' : 'Forgot Password?'}
+            <Text style={{ color: 'purple' }}>
+              {isSignup ? 'Already have an account? Login' : 'Need an account? Sign Up'}
             </Text>
           </Pressable>
-        )}
-      </View>
-    </View>
+          
+          {!isSignup && (
+            <Pressable
+              onPress={handlePasswordReset}
+              disabled={resettingPassword}
+            >
+              <Text style={{ color: 'purple', opacity: resettingPassword ? 0.6 : 1 }}>
+                {resettingPassword ? 'Sending...' : 'Forgot Password?'}
+              </Text>
+            </Pressable>
+          )}
+        </View>
+      </ScrollView>
+    </KeyboardAvoidingView>
   );
 }

@@ -21,8 +21,7 @@
     "web": {
       "bundler": "metro",
       "output": "static",
-      "favicon": "./assets/images/favicon-otter.png",
-      "basePath": "/lesbian-cycle-tracker"
+      "favicon": "./assets/images/favicon-otter.png"
     },
     "plugins": [
       "expo-router",

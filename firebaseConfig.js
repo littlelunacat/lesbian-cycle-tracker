@@ -9,13 +9,13 @@ import { getFirestore } from 'firebase/firestore';
 // Your web app's Firebase configuration
 // For Firebase JS SDK v7.20.0 and later, measurementId is optional
 const firebaseConfig = {
-  apiKey: "AIzaSyCoPsSBKi8nD73q476OJCsW5JGX91XFpto",
-  authDomain: "lesbian-cycle-tracker.firebaseapp.com",
-  projectId: "lesbian-cycle-tracker",
-  storageBucket: "lesbian-cycle-tracker.firebasestorage.app",
-  messagingSenderId: "953099703395",
-  appId: "1:953099703395:web:b831d36a84bd9838d5d456",
-  measurementId: "G-7ZTXFBDDC9"
+  apiKey: "AIzaSyC1onuhcYzkk9FPHhGSYhPYm538wiY5iJY",
+  authDomain: "lesbian-cycle-tracker-f4f1e.firebaseapp.com",
+  projectId: "lesbian-cycle-tracker-f4f1e",
+  storageBucket: "lesbian-cycle-tracker-f4f1e.firebasestorage.app",
+  messagingSenderId: "286665281095",
+  appId: "1:286665281095:web:52d332bd013cb02fb02b62",
+  measurementId: "G-LWJXTPX4DE"
 };
 
 // Initialize Firebase

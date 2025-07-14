@@ -2,7 +2,7 @@ import { useRouter } from 'expo-router';
 import { createUserWithEmailAndPassword } from 'firebase/auth';
 import { doc, setDoc } from 'firebase/firestore';
 import { useState } from 'react';
-import { Pressable, Text, TextInput, View } from 'react-native';
+import { KeyboardAvoidingView, Platform, Pressable, ScrollView, Text, TextInput } from 'react-native';
 import { auth, db } from '../firebaseConfig';
 
 export default function Signup() {
@@ -46,81 +46,96 @@ export default function Signup() {
   };
 
   return (
-    <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', padding: 20 }}>
-      <Text style={{ fontSize: 24, marginBottom: 30 }}>
-        Sign Up
-      </Text>
-
-      <TextInput
-        style={{
-          borderWidth: 1,
-          borderColor: '#ccc',
-          borderRadius: 5,
-          padding: 10,
-          marginBottom: 10,
-          width: '100%',
+    <KeyboardAvoidingView 
+      style={{ flex: 1 }} 
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+    >
+      <ScrollView 
+        contentContainerStyle={{ 
+          flexGrow: 1, 
+          justifyContent: 'center', 
+          alignItems: 'center', 
+          padding: 20,
+          paddingTop: 60,
+          paddingBottom: 60
         }}
-        placeholder="Email"
-        value={email}
-        onChangeText={setEmail}
-        keyboardType="email-address"
-        autoCapitalize="none"
-      />
-
-      <TextInput
-        style={{
-          borderWidth: 1,
-          borderColor: '#ccc',
-          borderRadius: 5,
-          padding: 10,
-          marginBottom: 10,
-          width: '100%',
-        }}
-        placeholder="Nickname (can be changed later)"
-        value={nickname}
-        onChangeText={setNickname}
-        autoCapitalize="words"
-      />
-
-      <TextInput
-        style={{
-          borderWidth: 1,
-          borderColor: '#ccc',
-          borderRadius: 5,
-          padding: 10,
-          marginBottom: 20,
-          width: '100%',
-        }}
-        placeholder="Password"
-        value={password}
-        onChangeText={setPassword}
-        secureTextEntry
-      />
-
-      <Pressable
-        onPress={handleSignup}
-        disabled={loading}
-        style={{
-          padding: 10,
-          backgroundColor: 'purple',
-          borderRadius: 5,
-          width: '100%',
-          opacity: loading ? 0.6 : 1,
-        }}
+        keyboardShouldPersistTaps="handled"
       >
-        <Text style={{ color: 'white', textAlign: 'center' }}>
-          {loading ? 'Creating Account...' : 'Sign Up'}
+        <Text style={{ fontSize: 24, marginBottom: 30 }}>
+          Sign Up
         </Text>
-      </Pressable>
 
-      <Pressable
-        onPress={() => router.push('/login')}
-        style={{ marginTop: 20 }}
-      >
-        <Text style={{ color: 'purple' }}>
-          Already have an account? Login
-        </Text>
-      </Pressable>
-    </View>
+        <TextInput
+          style={{
+            borderWidth: 1,
+            borderColor: '#ccc',
+            borderRadius: 5,
+            padding: 10,
+            marginBottom: 10,
+            width: '100%',
+          }}
+          placeholder="Email"
+          value={email}
+          onChangeText={setEmail}
+          keyboardType="email-address"
+          autoCapitalize="none"
+        />
+
+        <TextInput
+          style={{
+            borderWidth: 1,
+            borderColor: '#ccc',
+            borderRadius: 5,
+            padding: 10,
+            marginBottom: 10,
+            width: '100%',
+          }}
+          placeholder="Nickname (can be changed later)"
+          value={nickname}
+          onChangeText={setNickname}
+          autoCapitalize="words"
+        />
+
+        <TextInput
+          style={{
+            borderWidth: 1,
+            borderColor: '#ccc',
+            borderRadius: 5,
+            padding: 10,
+            marginBottom: 20,
+            width: '100%',
+          }}
+          placeholder="Password"
+          value={password}
+          onChangeText={setPassword}
+          secureTextEntry
+        />
+
+        <Pressable
+          onPress={handleSignup}
+          disabled={loading}
+          style={{
+            padding: 10,
+            backgroundColor: 'purple',
+            borderRadius: 5,
+            width: '100%',
+            opacity: loading ? 0.6 : 1,
+          }}
+        >
+          <Text style={{ color: 'white', textAlign: 'center' }}>
+            {loading ? 'Creating Account...' : 'Sign Up'}
+          </Text>
+        </Pressable>
+
+        <Pressable
+          onPress={() => router.push('/login')}
+          style={{ marginTop: 20 }}
+        >
+          <Text style={{ color: 'purple' }}>
+            Already have an account? Login
+          </Text>
+        </Pressable>
+      </ScrollView>
+    </KeyboardAvoidingView>
   );
 }

@@ -2,13 +2,15 @@
   "name": "lesbian-cycle-tracker",
   "main": "expo-router/entry",
   "version": "1.0.0",
-  "homepage": "https://littlelunacat.github.io/lesbian-cycle-tracker",
+
   "scripts": {
     "start": "expo start",
     "reset-project": "node ./scripts/reset-project.js",
     "android": "expo start --android",
     "ios": "expo start --ios",
     "web": "expo start --web",
+    "build": "expo export --platform web",
+    "deploy": "npm run build && firebase deploy",
     "lint": "expo lint"
   },
   "dependencies": {
