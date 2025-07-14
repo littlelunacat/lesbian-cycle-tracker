@@ -4,9 +4,11 @@ import { doc, setDoc } from 'firebase/firestore';
 import { useState } from 'react';
 import { KeyboardAvoidingView, Platform, Pressable, ScrollView, Text, TextInput, View } from 'react-native';
 import { auth, db } from '../firebaseConfig';
+import { useColorScheme } from '../hooks/useColorScheme';
 
 export default function Login() {
   const router = useRouter();
+  const colorScheme = useColorScheme();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [nickname, setNickname] = useState('');
@@ -14,6 +16,62 @@ export default function Login() {
   const [loading, setLoading] = useState(false);
   const [resettingPassword, setResettingPassword] = useState(false);
   const [notification, setNotification] = useState('');
+
+  // Dark mode styles
+  const isDark = colorScheme === 'dark';
+  const styles = {
+    container: {
+      flex: 1,
+      backgroundColor: isDark ? '#121212' : '#f5f5f5',
+    },
+    scrollContent: {
+      flexGrow: 1,
+      justifyContent: 'center',
+      alignItems: 'center',
+      padding: 20,
+      paddingTop: 60,
+      paddingBottom: 60,
+      backgroundColor: isDark ? '#121212' : '#f5f5f5',
+    },
+    title: {
+      fontSize: 24,
+      marginBottom: 30,
+      color: isDark ? '#ffffff' : '#333333',
+    },
+    input: {
+      borderWidth: 1,
+      borderColor: isDark ? '#444444' : '#cccccc',
+      borderRadius: 5,
+      padding: 10,
+      marginBottom: 10,
+      width: '100%',
+      backgroundColor: isDark ? '#1e1e1e' : '#ffffff',
+      color: isDark ? '#ffffff' : '#333333',
+    },
+    button: {
+      padding: 10,
+      backgroundColor: 'purple',
+      borderRadius: 5,
+      width: '100%',
+      opacity: loading ? 0.6 : 1,
+    },
+    buttonText: {
+      color: 'white',
+      textAlign: 'center',
+    },
+    linkText: {
+      color: 'purple',
+    },
+    notification: {
+      padding: 10,
+      borderRadius: 5,
+      marginBottom: 20,
+      width: '100%',
+    },
+    notificationText: {
+      textAlign: 'center',
+    },
+  };
 
   // Simple notification function that works on web
   const showNotification = (title, message) => {
@@ -108,52 +166,34 @@ export default function Login() {
 
   return (
     <KeyboardAvoidingView 
-      style={{ flex: 1 }} 
+      style={styles.container} 
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
     >
       <ScrollView 
-        contentContainerStyle={{ 
-          flexGrow: 1, 
-          justifyContent: 'center', 
-          alignItems: 'center', 
-          padding: 20,
-          paddingTop: 60,
-          paddingBottom: 60
-        }}
+        contentContainerStyle={styles.scrollContent}
         keyboardShouldPersistTaps="handled"
       >
-        <Text style={{ fontSize: 24, marginBottom: 30 }}>
+        <Text style={styles.title}>
           {isSignup ? 'Sign Up' : 'Login'}
         </Text>
 
         {notification ? (
-          <View style={{ 
+          <View style={[styles.notification, { 
             backgroundColor: notification.includes('Error') ? '#ffebee' : '#e8f5e8', 
-            padding: 10, 
-            borderRadius: 5, 
-            marginBottom: 20,
             border: notification.includes('Error') ? '1px solid #f44336' : '1px solid #4caf50',
-            width: '100%',
-          }}>
-            <Text style={{ 
+          }]}>
+            <Text style={[styles.notificationText, { 
               color: notification.includes('Error') ? '#d32f2f' : '#2e7d32',
-              textAlign: 'center'
-            }}>
+            }]}>
               {notification}
             </Text>
           </View>
         ) : null}
 
         <TextInput
-          style={{
-            borderWidth: 1,
-            borderColor: '#ccc',
-            borderRadius: 5,
-            padding: 10,
-            marginBottom: 10,
-            width: '100%',
-          }}
+          style={styles.input}
           placeholder="Email"
+          placeholderTextColor={isDark ? '#888888' : '#999999'}
           value={email}
           onChangeText={setEmail}
           keyboardType="email-address"
@@ -162,15 +202,9 @@ export default function Login() {
 
         {isSignup && (
           <TextInput
-            style={{
-              borderWidth: 1,
-              borderColor: '#ccc',
-              borderRadius: 5,
-              padding: 10,
-              marginBottom: 10,
-              width: '100%',
-            }}
+            style={styles.input}
             placeholder="Nickname (can be changed later)"
+            placeholderTextColor={isDark ? '#888888' : '#999999'}
             value={nickname}
             onChangeText={setNickname}
             autoCapitalize="words"
@@ -178,15 +212,9 @@ export default function Login() {
         )}
 
         <TextInput
-          style={{
-            borderWidth: 1,
-            borderColor: '#ccc',
-            borderRadius: 5,
-            padding: 10,
-            marginBottom: 20,
-            width: '100%',
-          }}
+          style={styles.input}
           placeholder="Password"
+          placeholderTextColor={isDark ? '#888888' : '#999999'}
           value={password}
           onChangeText={setPassword}
           secureTextEntry
@@ -195,15 +223,9 @@ export default function Login() {
         <Pressable
           onPress={handleAuth}
           disabled={loading}
-          style={{
-            padding: 10,
-            backgroundColor: 'purple',
-            borderRadius: 5,
-            width: '100%',
-            opacity: loading ? 0.6 : 1,
-          }}
+          style={styles.button}
         >
-          <Text style={{ color: 'white', textAlign: 'center' }}>
+          <Text style={styles.buttonText}>
             {loading ? 'Loading...' : (isSignup ? 'Sign Up' : 'Login')}
           </Text>
         </Pressable>
@@ -216,7 +238,7 @@ export default function Login() {
               setNotification(''); // Clear any existing notifications
             }}
           >
-            <Text style={{ color: 'purple' }}>
+            <Text style={styles.linkText}>
               {isSignup ? 'Already have an account? Login' : 'Need an account? Sign Up'}
             </Text>
           </Pressable>
@@ -226,7 +248,7 @@ export default function Login() {
               onPress={handlePasswordReset}
               disabled={resettingPassword}
             >
-              <Text style={{ color: 'purple', opacity: resettingPassword ? 0.6 : 1 }}>
+              <Text style={[styles.linkText, { opacity: resettingPassword ? 0.6 : 1 }]}>
                 {resettingPassword ? 'Sending...' : 'Forgot Password?'}
               </Text>
             </Pressable>
