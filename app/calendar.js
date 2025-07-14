@@ -9,7 +9,9 @@ import { auth, db } from '../firebaseConfig';
 const CustomDay = ({ date, state, marking, onPress }) => {
   const hasUserPeriod = marking?.selected;
   const hasPartnerPeriod = marking?.dots?.length > 0;
-  
+  const hasSexy = marking?.sexy;
+  const hasPartnerSexy = marking?.partnerSexy;
+  const isToday = state === 'today';
   return (
     <Pressable
       onPress={() => onPress(date)}
@@ -20,14 +22,17 @@ const CustomDay = ({ date, state, marking, onPress }) => {
         alignItems: 'center',
       }}
     >
-      <Text style={{
-        fontSize: 16,
-        color: state === 'disabled' ? '#d9e1e8' : '#333',
-        fontWeight: state === 'today' ? 'bold' : 'normal',
+      <View style={{
+        // No border for today, just bold font
       }}>
-        {date.day}
-      </Text>
-      
+        <Text style={{
+          fontSize: 16,
+          color: state === 'disabled' ? '#d9e1e8' : '#333',
+          fontWeight: isToday ? 'bold' : 'normal',
+        }}>
+          {date.day}
+        </Text>
+      </View>
       {/* Dots container */}
       <View style={{ 
         flexDirection: 'row', 
@@ -54,6 +59,34 @@ const CustomDay = ({ date, state, marking, onPress }) => {
             marginHorizontal: 1,
           }} />
         )}
+        {hasSexy && (
+          <View style={{
+            width: 12,
+            height: 12,
+            borderRadius: 6,
+            backgroundColor: 'purple',
+            marginHorizontal: 1,
+            shadowColor: 'green', // user's sexy: green glow
+            shadowOffset: { width: 0, height: 5 },
+            shadowOpacity: 1,
+            shadowRadius: 3,
+            elevation: 12,
+          }} />
+        )}
+        {hasPartnerSexy && (
+          <View style={{
+            width: 12,
+            height: 12,
+            borderRadius: 6,
+            backgroundColor: 'purple',
+            marginHorizontal: 1,
+            shadowColor: 'orange', // partner's sexy: orange glow
+            shadowOffset: { width: 0, height: 5 },
+            shadowOpacity: 1,
+            shadowRadius: 3,
+            elevation: 12,
+          }} />
+        )}
       </View>
     </Pressable>
   );
@@ -69,6 +102,9 @@ export default function CalendarPage() {
   const [myNickname, setMyNickname] = useState('');
   const [partnerNickname, setPartnerNickname] = useState('');
   const [trackingFor, setTrackingFor] = useState('self'); // 'self' or 'partner'
+  const [trackingType, setTrackingType] = useState('bloody'); // 'bloody' or 'sexy'
+  const [sexyDates, setSexyDates] = useState({}); // for user's sexy dates
+  const [partnerSexyDates, setPartnerSexyDates] = useState({}); // for partner's sexy dates
 
   // Load marked dates and partner data
   const fetchData = async (user) => {
@@ -95,6 +131,15 @@ export default function CalendarPage() {
       // Load user's nickname
       if (data.nickname) {
         setMyNickname(data.nickname);
+      }
+      
+      // Load user's sexy dates
+      if (data.sexyDates) {
+        const sexy = {};
+        data.sexyDates.forEach(date => {
+          sexy[date] = true;
+        });
+        setSexyDates(sexy);
       }
       
       // Load partner secret code and fetch partner's data
@@ -144,6 +189,16 @@ export default function CalendarPage() {
         if (data.nickname) {
           setPartnerNickname(data.nickname);
         }
+        // Load partner's sexy dates
+        if (data.sexyDates) {
+          const sexy = {};
+          data.sexyDates.forEach(date => {
+            sexy[date] = true;
+          });
+          setPartnerSexyDates(sexy);
+        } else {
+          setPartnerSexyDates({});
+        }
       } else {
         console.log('No partner found with secret code:', partnerSecretCode);
       }
@@ -152,15 +207,35 @@ export default function CalendarPage() {
     }
   };
 
-  // Combine current user and partner dates
+  // Combine current user and partner dates, and add sexyDates
   useEffect(() => {
     const combined = { ...markedDates };
-    
+    // Add user's sexy dates (purple dot)
+    Object.keys(sexyDates).forEach(date => {
+      if (combined[date]) {
+        combined[date] = { ...combined[date], sexy: true };
+      } else {
+        combined[date] = { sexy: true };
+      }
+    });
+    // Add partner's sexy dates (purple dot, but distinguishable by order)
+    Object.keys(partnerSexyDates).forEach(date => {
+      if (combined[date]) {
+        // If already has user's dot(s), add partner's sexy as a second purple dot
+        combined[date] = {
+          ...combined[date],
+          partnerSexy: true
+        };
+      } else {
+        combined[date] = { partnerSexy: true };
+      }
+    });
     if (Object.keys(partnerDates).length > 0) {
       Object.keys(partnerDates).forEach(date => {
         if (combined[date]) {
           // Both users have this date - show both dots side by side
           combined[date] = { 
+            ...combined[date],
             selected: true,
             dots: [
               { key: 'partner', color: 'orange' }
@@ -177,50 +252,72 @@ export default function CalendarPage() {
         }
       });
     }
-    
     setCombinedDates(combined);
-  }, [markedDates, partnerDates]);
+  }, [markedDates, partnerDates, sexyDates, partnerSexyDates]);
 
   // Toggle date and save
   const onDayPress = async (day) => {
     const date = day.dateString;
-    
-    if (trackingFor === 'self') {
-      // Toggle current user's period dates
-      let newMarkedDates = { ...markedDates };
-
-      if (newMarkedDates[date]) {
-        delete newMarkedDates[date];
+    if (trackingType === 'bloody') {
+      if (trackingFor === 'self') {
+        // Toggle current user's period dates
+        let newMarkedDates = { ...markedDates };
+        if (newMarkedDates[date]) {
+          delete newMarkedDates[date];
+        } else {
+          newMarkedDates[date] = { 
+            selected: true,
+            selectedColor: 'green'
+          };
+        }
+        setMarkedDates(newMarkedDates);
+        // Save to Firestore as array of date strings
+        const datesArray = Object.keys(newMarkedDates);
+        if (auth.currentUser) {
+          const userDoc = doc(db, 'users', auth.currentUser.uid);
+          await setDoc(userDoc, { periodDates: datesArray }, { merge: true });
+        }
       } else {
-        newMarkedDates[date] = { 
-          selected: true,
-          selectedColor: 'green'
-        };
+        // Toggle partner's period dates (temporary, not saved to database)
+        let newPartnerDates = { ...partnerDates };
+        if (newPartnerDates[date]) {
+          delete newPartnerDates[date];
+        } else {
+          newPartnerDates[date] = { 
+            selected: true,
+            selectedColor: 'orange'
+          };
+        }
+        setPartnerDates(newPartnerDates);
+        // Note: Partner dates are not saved to database - they're temporary
       }
-
-      setMarkedDates(newMarkedDates);
-
-      // Save to Firestore as array of date strings
-      const datesArray = Object.keys(newMarkedDates);
-      if (auth.currentUser) {
-        const userDoc = doc(db, 'users', auth.currentUser.uid);
-        await setDoc(userDoc, { periodDates: datesArray }, { merge: true });
-      }
-    } else {
-      // Toggle partner's period dates (temporary, not saved to database)
-      let newPartnerDates = { ...partnerDates };
-
-      if (newPartnerDates[date]) {
-        delete newPartnerDates[date];
+    } else if (trackingType === 'sexy') {
+      if (trackingFor === 'self') {
+        // Toggle user's sexy dates
+        let newSexyDates = { ...sexyDates };
+        if (newSexyDates[date]) {
+          delete newSexyDates[date];
+        } else {
+          newSexyDates[date] = true;
+        }
+        setSexyDates(newSexyDates);
+        // Save to Firestore as array of date strings
+        const sexyArray = Object.keys(newSexyDates);
+        if (auth.currentUser) {
+          const userDoc = doc(db, 'users', auth.currentUser.uid);
+          await setDoc(userDoc, { sexyDates: sexyArray }, { merge: true });
+        }
       } else {
-        newPartnerDates[date] = { 
-          selected: true,
-          selectedColor: 'orange'
-        };
+        // Toggle partner's sexy dates (temporary, not saved to database)
+        let newPartnerSexyDates = { ...partnerSexyDates };
+        if (newPartnerSexyDates[date]) {
+          delete newPartnerSexyDates[date];
+        } else {
+          newPartnerSexyDates[date] = true;
+        }
+        setPartnerSexyDates(newPartnerSexyDates);
+        // Not saved to database
       }
-
-      setPartnerDates(newPartnerDates);
-      // Note: Partner dates are not saved to database - they're temporary
     }
   };
 
@@ -300,14 +397,14 @@ export default function CalendarPage() {
                   borderRadius: 20,
                   borderWidth: 3,
                   borderColor: trackingFor === 'self' ? 'transparent' : 'transparent',
-                  shadowColor: trackingFor === 'self' ? '#666' : 'transparent',
+                  shadowColor: trackingFor === 'self' ? 'black' : 'transparent',
                   shadowOffset: { width: 0, height: 0 },
-                  shadowOpacity: trackingFor === 'self' ? 0.8 : 0,
-                  shadowRadius: trackingFor === 'self' ? 8 : 0,
-                  elevation: trackingFor === 'self' ? 8 : 0,
+                  shadowOpacity: trackingFor === 'self' ? 1 : 0,
+                  shadowRadius: trackingFor === 'self' ? 6 : 0,
+                  elevation: trackingFor === 'self' ? 12 : 0,
                   alignItems: 'center',
                   justifyContent: 'center',
-                  minWidth: 80,
+                  width: 110,
                 }}
               >
                 <Text style={{ 
@@ -328,14 +425,14 @@ export default function CalendarPage() {
                   borderRadius: 20,
                   borderWidth: 3,
                   borderColor: trackingFor === 'partner' ? 'transparent' : 'transparent',
-                  shadowColor: trackingFor === 'partner' ? '#666' : 'transparent',
+                  shadowColor: trackingFor === 'partner' ? 'black' : 'transparent',
                   shadowOffset: { width: 0, height: 0 },
-                  shadowOpacity: trackingFor === 'partner' ? 0.8 : 0,
-                  shadowRadius: trackingFor === 'partner' ? 8 : 0,
-                  elevation: trackingFor === 'partner' ? 8 : 0,
+                  shadowOpacity: trackingFor === 'partner' ? 1 : 0,
+                  shadowRadius: trackingFor === 'partner' ? 6 : 0,
+                  elevation: trackingFor === 'partner' ? 12 : 0,
                   alignItems: 'center',
                   justifyContent: 'center',
-                  minWidth: 80,
+                  width: 110,
                 }}
               >
                 <Text style={{ 
@@ -350,6 +447,66 @@ export default function CalendarPage() {
             </View>
           </View>
         )}
+        
+        {/* Toggle for "bloody" vs. "sexy" */}
+        <View style={{ flexDirection: 'row', justifyContent: 'center', gap: 8, marginBottom: 10 }}>
+          <Pressable
+            onPress={() => setTrackingType('bloody')}
+            style={{
+              padding: 10,
+              paddingHorizontal: 20,
+              backgroundColor: '#ccc',
+              borderRadius: 20,
+              borderWidth: 3,
+              borderColor: trackingType === 'bloody' ? 'transparent' : 'transparent',
+              shadowColor: trackingType === 'bloody' ? 'black' : 'transparent',
+              shadowOffset: { width: 0, height: 0 },
+              shadowOpacity: trackingType === 'bloody' ? 1 : 0,
+              shadowRadius: trackingType === 'bloody' ? 6 : 0,
+              elevation: trackingType === 'bloody' ? 12 : 0,
+              alignItems: 'center',
+              justifyContent: 'center',
+              width: 110,
+            }}
+          >
+            <Text style={{ 
+              fontSize: 14, 
+              color: 'white',
+              fontWeight: 'bold',
+              textAlign: 'center',
+            }}>
+              bloody
+            </Text>
+          </Pressable>
+          <Pressable
+            onPress={() => setTrackingType('sexy')}
+            style={{
+              padding: 10,
+              paddingHorizontal: 20,
+              backgroundColor: 'purple',
+              borderRadius: 20,
+              borderWidth: 3,
+              borderColor: trackingType === 'sexy' ? 'transparent' : 'transparent',
+              shadowColor: trackingType === 'sexy' ? 'black' : 'transparent',
+              shadowOffset: { width: 0, height: 0 },
+              shadowOpacity: trackingType === 'sexy' ? 1 : 0,
+              shadowRadius: trackingType === 'sexy' ? 6 : 0,
+              elevation: trackingType === 'sexy' ? 12 : 0,
+              alignItems: 'center',
+              justifyContent: 'center',
+              width: 110,
+            }}
+          >
+            <Text style={{ 
+              fontSize: 14, 
+              color: 'white',
+              fontWeight: 'bold',
+              textAlign: 'center',
+            }}>
+              sexy
+            </Text>
+          </Pressable>
+        </View>
         
         <View style={{ 
           backgroundColor: 'white', 

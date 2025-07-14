@@ -107,14 +107,14 @@ export default function Signup() {
           Sign Up
         </Text>
 
-        <TextInput
+      <TextInput
           style={styles.input}
-          placeholder="Email"
+        placeholder="Email"
           placeholderTextColor={isDark ? '#888888' : '#999999'}
-          value={email}
-          onChangeText={setEmail}
-          keyboardType="email-address"
-          autoCapitalize="none"
+        value={email}
+        onChangeText={setEmail}
+        keyboardType="email-address"
+        autoCapitalize="none"
         />
 
         <TextInput
@@ -126,14 +126,14 @@ export default function Signup() {
           autoCapitalize="words"
         />
 
-        <TextInput
+      <TextInput
           style={styles.input}
           placeholder="Password"
           placeholderTextColor={isDark ? '#888888' : '#999999'}
-          value={password}
-          onChangeText={setPassword}
-          secureTextEntry
-        />
+        value={password}
+        onChangeText={setPassword}
+        secureTextEntry
+      />
 
         <Pressable
           onPress={handleSignup}
@@ -152,7 +152,7 @@ export default function Signup() {
           <Text style={styles.linkText}>
             Already have an account? Login
           </Text>
-        </Pressable>
+      </Pressable>
       </ScrollView>
     </KeyboardAvoidingView>
   );
