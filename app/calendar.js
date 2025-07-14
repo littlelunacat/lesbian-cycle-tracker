@@ -367,6 +367,16 @@ export default function CalendarPage() {
             dayComponent={CustomDay}
             enableSwipeMonths={true}
             hideExtraDays={false}
+            renderArrow={(direction) => (
+              <Text style={{ 
+                fontSize: 20, 
+                color: '#000000',
+                fontWeight: 'bold',
+                padding: 10
+              }}>
+                {direction === 'left' ? '‹' : '›'}
+              </Text>
+            )}
             theme={{
               backgroundColor: 'transparent',
               calendarBackground: 'transparent',
@@ -391,6 +401,23 @@ export default function CalendarPage() {
                 },
                 arrow: {
                   color: '#000000',
+                },
+                arrowImage: {
+                  tintColor: '#000000',
+                },
+                arrowContainer: {
+                  backgroundColor: 'transparent',
+                },
+              },
+              'stylesheet.calendar.main': {
+                arrow: {
+                  color: '#000000',
+                },
+                arrowImage: {
+                  tintColor: '#000000',
+                },
+                arrowContainer: {
+                  backgroundColor: 'transparent',
                 },
               },
             }}
