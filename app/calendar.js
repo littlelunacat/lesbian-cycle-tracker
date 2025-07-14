@@ -282,15 +282,15 @@ export default function CalendarPage() {
         </Pressable>
       </View>
 
-      {/* Calendar section */}
-      <View style={{ flex: 1, padding: 20 }}>
+      {/* Scrollable content */}
+      <ScrollView style={{ flex: 1 }} contentContainerStyle={{ padding: 20 }}>
         {partnerId && (
           <View style={{ 
-            padding: 15, 
-            marginBottom: 20,
+            padding: 10, 
+            marginBottom: 15,
           }}>
 
-            <View style={{ flexDirection: 'row', justifyContent: 'center', gap: 10 }}>
+            <View style={{ flexDirection: 'row', justifyContent: 'center', gap: 8 }}>
               <Pressable
                 onPress={() => setTrackingFor('self')}
                 style={{
@@ -374,7 +374,7 @@ export default function CalendarPage() {
               todayTextColor: 'purple',
               dayTextColor: '#333',
               textDisabledColor: '#d9e1e8',
-              arrowColor: '#333',
+              arrowColor: '#000',
               monthTextColor: '#333',
               indicatorColor: 'purple',
               textDayFontWeight: '300',
@@ -403,7 +403,7 @@ export default function CalendarPage() {
             This app is developed proudly by Luna and Cat.
           </Text>
         </View>
-      </View>
+      </ScrollView>
     </View>
   );
 } 
